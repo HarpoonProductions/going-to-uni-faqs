@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage with Purple Theme
+// app/page.tsx - Going To Uni FAQs Homepage with Purple Theme (ESLint fixed)
 
 'use client'
 
@@ -178,7 +178,7 @@ const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps
               </div>
               <h4 className="font-medium text-slate-800 mb-2">No results found</h4>
               <p className="text-sm text-slate-600 mb-4">
-                We couldn't find any university FAQs matching "{query}"
+                We couldn&apos;t find any university FAQs matching &quot;{query}&quot;
               </p>
               <button
                 onClick={() => {
@@ -378,7 +378,7 @@ Timestamp: ${new Date().toISOString()}
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-slate-800 mb-2">Thank you!</h3>
-              <p className="text-slate-600">Your university question suggestion has been sent. We'll review it and may add it to our FAQ collection.</p>
+              <p className="text-slate-600">Your university question suggestion has been sent. We&apos;ll review it and may add it to our FAQ collection.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -644,7 +644,7 @@ export default function HomePage() {
               Suggest a University Question
             </button>
             <p className="text-slate-500 text-sm mt-3">
-              Can't find what you're looking for? Let us know!
+              Can&apos;t find what you&apos;re looking for? Let us know!
             </p>
           </div>
         </div>
@@ -652,7 +652,7 @@ export default function HomePage() {
         {/* Articles Grid */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {faqs.map((faq, index) => {
+            {faqs.map((faq) => {
               const imageUrl = faq.image?.asset?.url
                 ? urlFor(faq.image).width(500).height(300).fit('crop').url()
                 : '/fallback.jpg'
