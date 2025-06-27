@@ -37,7 +37,7 @@ interface Category {
 interface Faq {
   _id: string
   question: string
-  answer: any[]
+  answer: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   slug: { current: string }
   summaryForAI?: string
   alternateQuestions?: string[]
@@ -469,7 +469,10 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
-      setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
+      // Remove unused siteSettings assignment - keeping for future use
+      if (siteSettingsData.status === 'fulfilled') {
+        setSiteSettings(siteSettingsData.value);
+      }
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
       // Fetch related FAQs if keywords/category exist
