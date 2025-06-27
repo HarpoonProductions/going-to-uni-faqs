@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage with Purple Theme (ESLint fixed)
+// app/page.tsx - Going To Uni FAQs Homepage with Logo
 
 'use client'
 
@@ -535,7 +535,7 @@ export default function HomePage() {
               "alternateName": "Going To Uni FAQs",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://goingtounifaqs.com/logo.png"
+                "url": "https://goingtounifaqs.com/goingtounifaqs.png"
               }
             },
             "potentialAction": {
@@ -559,7 +559,7 @@ export default function HomePage() {
             "url": "https://goingtounifaqs.com",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://goingtounifaqs.com/logo.png"
+              "url": "https://goingtounifaqs.com/goingtounifaqs.png"
             },
             "description": "Quick answers to your university and college questions",
             "foundingDate": "2025",
@@ -599,14 +599,19 @@ export default function HomePage() {
 
       {/* Main Content - Flex grow to push footer down */}
       <div className="flex-grow">
-        {/* Header Section */}
+        {/* Header Section with Logo */}
         <div className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto text-center" style={{ maxWidth: '1600px' }}>
             <Link href="/" className="inline-block">
               <div className="mx-auto mb-6">
-                <h1 className="text-6xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 bg-clip-text text-transparent mb-4">
-                  Going To Uni FAQs
-                </h1>
+                <Image
+                  src="/goingtounifaqs.png"
+                  alt="Going To Uni FAQs"
+                  width={500}
+                  height={150}
+                  className="mx-auto mb-4"
+                  priority
+                />
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full"></div>
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
@@ -758,7 +763,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer with "Powered by Upsum" */}
+      {/* Footer with "Powered by Upsum" - Full width treatment */}
       <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
