@@ -441,7 +441,6 @@ interface FaqPageProps {
 export default function FaqPage({ params }: FaqPageProps) {
   const [slug, setSlug] = useState<string>('');
   const [faq, setFaq] = useState<Faq | null>(null);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedFaqs, setRelatedFaqs] = useState<Faq[]>([]);
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
@@ -456,10 +455,9 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      // Fetch FAQ, site settings, and search FAQs
-      const [faqData, siteSettingsData, searchFAQsData] = await Promise.allSettled([
+      // Fetch FAQ and search FAQs
+      const [faqData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
-        client.fetch(siteSettingsQuery),
         client.fetch(searchFAQsQuery)
       ]);
 
@@ -469,10 +467,6 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
-      // Remove unused siteSettings assignment - keeping for future use
-      if (siteSettingsData.status === 'fulfilled') {
-        setSiteSettings(siteSettingsData.value);
-      }
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
       // Fetch related FAQs if keywords/category exist
