@@ -1,4 +1,4 @@
-// app/faqs/[slug]/page.tsx - GoingtouniFAQs Individual FAQ page with Logo
+// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page with FIXED IMAGE HANDLING
 
 'use client'
 
@@ -58,6 +58,27 @@ interface Faq {
   }
   customSchemaMarkup?: string
 }
+
+// Helper function to safely generate image URLs
+const getImageUrl = (image: Faq['image'], width = 500, height = 300): string => {
+  try {
+    if (image?.asset?.url) {
+      // Use urlFor if available, otherwise use direct URL
+      if (typeof urlFor === 'function') {
+        return urlFor(image).width(width).height(height).fit('crop').url();
+      } else {
+        // Fallback to direct Sanity CDN URL manipulation
+        const baseUrl = image.asset.url;
+        return `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
+      }
+    }
+  } catch (error) {
+    console.warn('Error generating image URL:', error);
+  }
+  
+  // Return a data URL for a placeholder instead of a file path that might not exist
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+};
 
 // Enhanced queries with all the data needed for gold-standard schema
 const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
@@ -122,7 +143,7 @@ const searchFAQsQuery = groq`*[_type == "faq" && defined(slug.current) && define
   summaryForAI
 }`
 
-// Search Component - Purple themed for GoingtouniFAQs
+// Search Component - Purple themed for Going To Uni FAQs
 interface SearchFAQ {
   _id: string;
   question: string;
@@ -441,7 +462,7 @@ export default function FaqPage({ params }: FaqPageProps) {
           categoryRef: faqData.value.category?._id,
           keywords: faqData.value.keywords || []
         });
-        setRelatedFaqs(related);
+        setRelatedFaqs(related || []);
       }
       
       setLoading(false);
@@ -571,7 +592,7 @@ export default function FaqPage({ params }: FaqPageProps) {
           {faq.image?.asset?.url && (
             <div className="relative h-80 md:h-96 overflow-hidden">
               <Image
-                src={urlFor(faq.image).width(1200).height(600).fit('crop').url()}
+                src={getImageUrl(faq.image, 1200, 600)}
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
@@ -618,7 +639,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                 <div className="flex items-center gap-2">
                   {faq.author.image && (
                     <Image
-                      src={urlFor(faq.author.image).width(32).height(32).url()}
+                      src={getImageUrl(faq.author.image, 32, 32)}
                       alt={faq.author.name}
                       width={32}
                       height={32}
@@ -671,7 +692,7 @@ export default function FaqPage({ params }: FaqPageProps) {
               </div>
             )}
 
-            {/* Clickable Citation Box - Purple theme for GoingtouniFAQs */}
+            {/* Clickable Citation Box - Purple theme for Going To Uni FAQs */}
             <CitationBox 
               question={faq.question}
               url={faqUrl}
@@ -690,9 +711,7 @@ export default function FaqPage({ params }: FaqPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {relatedFaqs.map((related) => {
-                const imageUrl = related.image?.asset?.url
-                  ? urlFor(related.image).width(500).height(300).fit('crop').url()
-                  : '/fallback.jpg'
+                const imageUrl = getImageUrl(related.image, 500, 300);
 
                 return (
                   <Link

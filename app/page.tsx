@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage with Logo
+// app/page.tsx - Going To Uni FAQs Homepage with FIXED IMAGE HANDLING
 
 'use client'
 
@@ -31,6 +31,36 @@ interface SearchBoxProps {
   onSuggestQuestion: (question?: string) => void;
   theme?: 'blue' | 'orange' | 'purple';
 }
+
+// Helper function to safely generate image URLs
+const getImageUrl = (image: FAQ['image'], width = 500, height = 300): string => {
+  try {
+    if (image?.asset?.url) {
+      // Try to use urlFor function (should work with your setup)
+      const imageUrl = urlFor(image).width(width).height(height).fit('crop').url();
+      console.log('Generated image URL:', imageUrl); // Debug log
+      return imageUrl;
+    }
+  } catch (error) {
+    console.error('Error generating image URL with urlFor:', error);
+    
+    // Fallback: try direct Sanity CDN URL manipulation
+    try {
+      if (image?.asset?.url) {
+        const baseUrl = image.asset.url;
+        const fallbackUrl = `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
+        console.log('Using fallback image URL:', fallbackUrl); // Debug log
+        return fallbackUrl;
+      }
+    } catch (fallbackError) {
+      console.error('Error with fallback image URL:', fallbackError);
+    }
+  }
+  
+  console.log('Using placeholder image'); // Debug log
+  // Return a data URL for a placeholder instead of a file path that might not exist
+  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
+};
 
 // Search Component - Purple themed for Going To Uni
 const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps) => {
@@ -500,9 +530,10 @@ export default function HomePage() {
         }`;
         
         const result = await client.fetch(query);
-        setFaqs(result);
+        setFaqs(result || []); // Ensure we always have an array
       } catch (error) {
         console.error('❌ Fetch error:', error);
+        setFaqs([]); // Set empty array on error
       }
     };
 
@@ -658,9 +689,8 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {faqs.map((faq) => {
-              const imageUrl = faq.image?.asset?.url
-                ? urlFor(faq.image).width(500).height(300).fit('crop').url()
-                : '/fallback.jpg'
+              // Use the safe image URL function
+              const imageUrl = getImageUrl(faq.image, 500, 300);
 
               return (
                 <article
