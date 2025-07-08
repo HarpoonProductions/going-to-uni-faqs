@@ -1,4 +1,4 @@
-// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page with FIXED IMAGES and UPF-style layout
+// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page - EXACT COPY of UPF pattern with purple theme
 
 'use client'
 
@@ -37,7 +37,7 @@ interface Category {
 interface Faq {
   _id: string
   question: string
-  answer: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
+  answer: any[]
   slug: { current: string }
   summaryForAI?: string
   alternateQuestions?: string[]
@@ -59,34 +59,30 @@ interface Faq {
   customSchemaMarkup?: string
 }
 
-// Helper function to safely generate image URLs - SIMPLIFIED to avoid 400 errors
-const getImageUrl = (image: Faq['image'], width = 500, height = 300): string => {
-  try {
-    if (image?.asset?.url) {
-      // Use simple width/height only - no fit or crop to avoid 400 errors
-      const imageUrl = urlFor(image).width(width).height(height).url();
-      console.log('Generated simple image URL:', imageUrl);
-      return imageUrl;
-    }
-  } catch (error) {
-    console.error('Error generating image URL:', error);
-    
-    // Fallback: try direct URL
-    try {
-      if (image?.asset?.url) {
-        const baseUrl = image.asset.url;
-        const fallbackUrl = `${baseUrl}?w=${width}&h=${height}`;
-        console.log('Using direct fallback URL:', fallbackUrl);
-        return fallbackUrl;
-      }
-    } catch (fallbackError) {
-      console.error('Fallback failed:', fallbackError);
-    }
+interface SiteSettings {
+  title: string
+  description: string
+  url: string
+  logo?: {
+    asset: { url: string }
+    alt?: string
   }
-  
-  console.log('Using placeholder image');
-  return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
-};
+  organization: {
+    name: string
+    alternateName?: string
+    foundingDate?: string
+    areaServed?: string
+    knowsAbout?: string[]
+  }
+  socialMedia?: {
+    twitter?: string
+    linkedin?: string
+    facebook?: string
+  }
+  searchAction?: {
+    searchUrl?: string
+  }
+}
 
 // Enhanced queries
 const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
@@ -129,6 +125,16 @@ const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   customSchemaMarkup
 }`
 
+const siteSettingsQuery = groq`*[_type == "siteSettings"][0] {
+  title,
+  description,
+  url,
+  logo,
+  organization,
+  socialMedia,
+  searchAction
+}`
+
 const relatedQuery = groq`*[_type == "faq" && _id != $currentId && (category._ref == $categoryRef || count((keywords[])[@ in $keywords]) > 0)][0...3] {
   _id,
   question,
@@ -143,6 +149,7 @@ const relatedQuery = groq`*[_type == "faq" && _id != $currentId && (category._re
   }
 }`
 
+// Search FAQs query for the search box
 const searchFAQsQuery = groq`*[_type == "faq" && defined(slug.current) && defined(question)] {
   _id,
   question,
@@ -162,11 +169,13 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
+  // Search logic with null safety
   const searchResults = useMemo(() => {
     if (!query.trim() || query.length < 2) return [];
     
     const searchTerm = query.toLowerCase();
     
+    // Filter out FAQs with null/invalid slugs BEFORE searching
     const validFaqs = searchFAQs.filter(faq => 
       faq && 
       faq.slug && 
@@ -177,9 +186,10 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
     return validFaqs.filter(faq => 
       faq.question.toLowerCase().includes(searchTerm) ||
       faq.summaryForAI?.toLowerCase().includes(searchTerm)
-    ).slice(0, 5);
+    ).slice(0, 5); // Show max 5 results
   }, [query, searchFAQs]);
 
+  // Highlight search terms
   const highlightText = (text: string, searchTerm: string) => {
     if (!searchTerm || !text) return text;
     
@@ -193,6 +203,7 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
 
   return (
     <div className="relative max-w-xl mx-auto">
+      {/* Search Input */}
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg className="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,19 +236,22 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
         )}
       </div>
 
+      {/* Search Results Dropdown */}
       {isOpen && query.length >= 2 && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-slate-200 z-50 max-h-80 overflow-y-auto">
           {searchResults.length > 0 ? (
             <>
+              {/* Results Header */}
               <div className="px-4 py-2 border-b border-slate-100">
                 <p className="text-xs font-medium text-slate-700">
                   Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
                 </p>
               </div>
               
+              {/* Results List */}
               <div className="py-1">
                 {searchResults
-                  .filter(faq => faq && faq.slug && faq.slug.current && faq.question)
+                  .filter(faq => faq && faq.slug && faq.slug.current && faq.question) // Double safety check
                   .map((faq) => (
                   <Link
                     key={faq._id}
@@ -269,6 +283,7 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
               </div>
             </>
           ) : (
+            /* No Results */
             <div className="px-4 py-6 text-center">
               <div className="w-8 h-8 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-2">
                 <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,13 +292,14 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
               </div>
               <h4 className="font-medium text-slate-800 mb-1 text-sm">No results found</h4>
               <p className="text-xs text-slate-600">
-                No university FAQs match &quot;{query}&quot;
+                No university FAQs match "{query}"
               </p>
             </div>
           )}
         </div>
       )}
 
+      {/* Click outside to close */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-40" 
@@ -294,7 +310,7 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
   );
 };
 
-// Citation Box Component
+// Citation Box Component with Copy Functionality
 interface CitationBoxProps {
   question: string;
   url: string;
@@ -332,6 +348,7 @@ const CitationBox = ({ question, url, theme = 'purple' }: CitationBoxProps) => {
   };
 
   const colors = themeColors[theme];
+
   const citationText = `"${question}." Going To Uni FAQs. Available at: ${url}`;
 
   const handleCopyClick = async () => {
@@ -341,6 +358,7 @@ const CitationBox = ({ question, url, theme = 'purple' }: CitationBoxProps) => {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy citation:', err);
+      // Fallback for older browsers
       const textArea = document.createElement('textarea');
       textArea.value = citationText;
       document.body.appendChild(textArea);
@@ -389,7 +407,7 @@ const CitationBox = ({ question, url, theme = 'purple' }: CitationBoxProps) => {
             </span>
           </h3>
           <p className="text-sm text-slate-700 leading-relaxed">
-            &quot;{question}.&quot; <em className="font-medium">Going To Uni FAQs</em>. Available at:{' '}
+            "{question}." <em className="font-medium">Going To Uni FAQs</em>. Available at:{' '}
             <span className={`${colors.linkText} underline decoration-2 underline-offset-2 transition-colors duration-200 break-all`}>
               {url}
             </span>
@@ -402,6 +420,7 @@ const CitationBox = ({ question, url, theme = 'purple' }: CitationBoxProps) => {
         </div>
       </div>
       
+      {/* Success animation overlay */}
       {copied && (
         <div className="absolute inset-0 rounded-2xl bg-green-100/50 flex items-center justify-center pointer-events-none">
           <div className="bg-white rounded-full p-3 shadow-lg">
@@ -422,10 +441,12 @@ interface FaqPageProps {
 export default function FaqPage({ params }: FaqPageProps) {
   const [slug, setSlug] = useState<string>('');
   const [faq, setFaq] = useState<Faq | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedFaqs, setRelatedFaqs] = useState<Faq[]>([]);
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Resolve params and fetch data
   useEffect(() => {
     params.then(resolvedParams => {
       setSlug(resolvedParams.slug);
@@ -435,8 +456,10 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      const [faqData, searchFAQsData] = await Promise.allSettled([
+      // Fetch FAQ, site settings, and search FAQs
+      const [faqData, siteSettingsData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
+        client.fetch(siteSettingsQuery),
         client.fetch(searchFAQsQuery)
       ]);
 
@@ -446,20 +469,17 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
+      setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
+      // Fetch related FAQs if keywords/category exist
       if (faqData.value.keywords?.length || faqData.value.category) {
-        try {
-          const related: Faq[] = await client.fetch(relatedQuery, { 
-            currentId: faqData.value._id,
-            categoryRef: faqData.value.category?._ref || faqData.value.category?._id || null,
-            keywords: faqData.value.keywords || []
-          });
-          setRelatedFaqs(related || []);
-        } catch (relatedError) {
-          console.warn('Error fetching related FAQs:', relatedError);
-          setRelatedFaqs([]);
-        }
+        const related: Faq[] = await client.fetch(relatedQuery, { 
+          currentId: faqData.value._id,
+          categoryRef: faqData.value.category?._id,
+          keywords: faqData.value.keywords || []
+        });
+        setRelatedFaqs(related);
       }
       
       setLoading(false);
@@ -489,7 +509,7 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      {/* JSON-LD Structured Data */}
+      {/* Enhanced JSON-LD Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -542,7 +562,7 @@ export default function FaqPage({ params }: FaqPageProps) {
         }}
       />
 
-      {/* Header Section - MATCHING UPF LAYOUT */}
+      {/* Header Section - EXACT UPF PATTERN */}
       <div className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
           <Link href="/" className="inline-block">
@@ -558,13 +578,14 @@ export default function FaqPage({ params }: FaqPageProps) {
             Quick answers to your university and college questions
           </p>
           
+          {/* Search Box */}
           <div className="mb-6">
             <FAQPageSearch searchFAQs={searchFAQs} />
           </div>
         </div>
       </div>
 
-      {/* Navigation - MATCHING UPF STYLE */}
+      {/* Navigation */}
       <div className="mx-auto px-4 sm:px-6 lg:px-8 mb-8" style={{ maxWidth: '1600px' }}>
         <div className="flex items-center gap-4 text-sm">
           <Link 
@@ -581,24 +602,26 @@ export default function FaqPage({ params }: FaqPageProps) {
         </div>
       </div>
 
-      {/* Main Content - MATCHING UPF LAYOUT */}
+      {/* Main Content - EXACT UPF PATTERN */}
       <main className="flex-grow mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
         <article className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mb-12">
           {/* Hero Image with Question Overlay */}
           {faq.image?.asset?.url && (
             <div className="relative h-80 md:h-96 overflow-hidden">
               <Image
-                src={getImageUrl(faq.image, 1200, 600)}
+                src={urlFor(faq.image).width(1200).height(600).fit('crop').url()}
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
               />
               
+              {/* Dark gradient overlay for text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               
+              {/* Question overlay */}
               <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
                 <div className="mb-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
                     <div className="w-2 h-2 bg-white rounded-full"></div>
                     University Question
                   </span>
@@ -616,8 +639,8 @@ export default function FaqPage({ params }: FaqPageProps) {
             {!faq.image?.asset?.url && (
               <div className="mb-8">
                 <div className="mb-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-purple-100 rounded-full text-purple-700 text-sm font-medium">
-                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-slate-700 text-sm font-medium">
+                    <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
                     University Question
                   </span>
                 </div>
@@ -633,7 +656,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                 <div className="flex items-center gap-2">
                   {faq.author.image && (
                     <Image
-                      src={getImageUrl(faq.author.image, 32, 32)}
+                      src={urlFor(faq.author.image).width(32).height(32).url()}
                       alt={faq.author.name}
                       width={32}
                       height={32}
@@ -686,7 +709,7 @@ export default function FaqPage({ params }: FaqPageProps) {
               </div>
             )}
 
-            {/* Citation Box */}
+            {/* Clickable Citation Box - Purple theme for Going To Uni FAQs */}
             <CitationBox 
               question={faq.question}
               url={faqUrl}
@@ -695,7 +718,7 @@ export default function FaqPage({ params }: FaqPageProps) {
           </div>
         </article>
 
-        {/* Related Questions */}
+        {/* Related Questions - Enhanced with better related logic */}
         {relatedFaqs?.length > 0 && (
           <section>
             <div className="text-center mb-12">
@@ -705,7 +728,9 @@ export default function FaqPage({ params }: FaqPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {relatedFaqs.map((related) => {
-                const imageUrl = getImageUrl(related.image, 500, 300);
+                const imageUrl = related.image?.asset?.url
+                  ? urlFor(related.image).width(500).height(300).fit('crop').url()
+                  : '/fallback.jpg'
 
                 return (
                   <Link
@@ -713,6 +738,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                     href={`/faqs/${related.slug.current}`}
                     className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
                   >
+                    {/* Image with overlay - matching front page style */}
                     <div className="relative h-64 overflow-hidden">
                       <Image
                         src={imageUrl}
@@ -721,11 +747,13 @@ export default function FaqPage({ params }: FaqPageProps) {
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
                       />
                       
+                      {/* Dark gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       
+                      {/* Text overlay */}
                       <div className="absolute inset-0 p-6 flex flex-col justify-end">
                         <div className="mb-3">
-                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
                             <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                             Related
                           </span>
@@ -735,6 +763,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                         </h4>
                       </div>
                       
+                      {/* Hover indicator */}
                       <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
                         <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -742,6 +771,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                       </div>
                     </div>
 
+                    {/* Content */}
                     <div className="p-6">
                       {related.summaryForAI && (
                         <p className="text-slate-600 leading-relaxed line-clamp-3 mb-4">
@@ -763,7 +793,7 @@ export default function FaqPage({ params }: FaqPageProps) {
         )}
       </main>
 
-      {/* Footer - MATCHING UPF STYLE */}
+      {/* Footer - EXACT UPF PATTERN */}
       <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
