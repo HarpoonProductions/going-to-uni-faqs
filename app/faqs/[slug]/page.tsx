@@ -457,12 +457,17 @@ export default function FaqPage({ params }: FaqPageProps) {
       
       // Fetch related FAQs if keywords/category exist
       if (faqData.value.keywords?.length || faqData.value.category) {
-        const related: Faq[] = await client.fetch(relatedQuery, { 
-          currentId: faqData.value._id,
-          categoryRef: faqData.value.category?._id,
-          keywords: faqData.value.keywords || []
-        });
-        setRelatedFaqs(related || []);
+        try {
+          const related: Faq[] = await client.fetch(relatedQuery, { 
+            currentId: faqData.value._id,
+            categoryRef: faqData.value.category?._ref || faqData.value.category?._id || null,
+            keywords: faqData.value.keywords || []
+          });
+          setRelatedFaqs(related || []);
+        } catch (relatedError) {
+          console.warn('Error fetching related FAQs:', relatedError);
+          setRelatedFaqs([]);
+        }
       }
       
       setLoading(false);
