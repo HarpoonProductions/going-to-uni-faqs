@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage with FIXED IMAGE HANDLING
+// app/page.tsx - Going To Uni FAQs Homepage with FIXED IMAGES and UPF-style layout
 
 'use client'
 
@@ -32,33 +32,32 @@ interface SearchBoxProps {
   theme?: 'blue' | 'orange' | 'purple';
 }
 
-// Helper function to safely generate image URLs
+// Helper function to safely generate image URLs - SIMPLIFIED to avoid 400 errors
 const getImageUrl = (image: FAQ['image'], width = 500, height = 300): string => {
   try {
     if (image?.asset?.url) {
-      // Try to use urlFor function (should work with your setup)
-      const imageUrl = urlFor(image).width(width).height(height).fit('crop').url();
-      console.log('Generated image URL:', imageUrl); // Debug log
+      // Use simple width/height only - no fit or crop to avoid 400 errors
+      const imageUrl = urlFor(image).width(width).height(height).url();
+      console.log('Generated simple image URL:', imageUrl);
       return imageUrl;
     }
   } catch (error) {
-    console.error('Error generating image URL with urlFor:', error);
+    console.error('Error generating image URL:', error);
     
-    // Fallback: try direct Sanity CDN URL manipulation
+    // Fallback: try direct URL
     try {
       if (image?.asset?.url) {
         const baseUrl = image.asset.url;
-        const fallbackUrl = `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
-        console.log('Using fallback image URL:', fallbackUrl); // Debug log
+        const fallbackUrl = `${baseUrl}?w=${width}&h=${height}`;
+        console.log('Using direct fallback URL:', fallbackUrl);
         return fallbackUrl;
       }
     } catch (fallbackError) {
-      console.error('Error with fallback image URL:', fallbackError);
+      console.error('Fallback failed:', fallbackError);
     }
   }
   
-  console.log('Using placeholder image'); // Debug log
-  // Return a data URL for a placeholder instead of a file path that might not exist
+  console.log('Using placeholder image');
   return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K';
 };
 
@@ -104,7 +103,7 @@ const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps
     return faqs.filter(faq => 
       faq.question?.toLowerCase().includes(searchTerm) ||
       (faq.summaryForAI && faq.summaryForAI.toLowerCase().includes(searchTerm))
-    ).slice(0, 5); // Show max 5 results
+    ).slice(0, 5);
   }, [query, faqs]);
 
   // Highlight search terms
@@ -159,14 +158,12 @@ const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps
         <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 max-h-96 overflow-y-auto">
           {searchResults.length > 0 ? (
             <>
-              {/* Results Header */}
               <div className="px-4 py-3 border-b border-slate-100">
                 <p className="text-sm font-medium text-slate-700">
                   Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
                 </p>
               </div>
               
-              {/* Results List */}
               <div className="py-2">
                 {searchResults.map((faq) => (
                   <Link
@@ -199,7 +196,6 @@ const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps
               </div>
             </>
           ) : (
-            /* No Results */
             <div className="px-4 py-8 text-center">
               <div className={`w-12 h-12 ${colors.bg} rounded-full flex items-center justify-center mx-auto mb-3`}>
                 <svg className={`w-6 h-6 ${colors.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,7 +261,6 @@ const SuggestQuestionModal = ({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [rateLimitError, setRateLimitError] = useState('');
 
-  // Pre-fill question when modal opens
   useEffect(() => {
     if (isOpen && prefillQuestion) {
       setFormData(prev => ({
@@ -298,7 +293,6 @@ const SuggestQuestionModal = ({
 
   const colors = themeColors[theme];
 
-  // Check rate limiting
   const checkRateLimit = () => {
     const lastSubmission = localStorage.getItem('lastQuestionSubmission');
     const now = Date.now();
@@ -315,14 +309,12 @@ const SuggestQuestionModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check rate limiting
     const rateLimitMsg = checkRateLimit();
     if (rateLimitMsg) {
       setRateLimitError(rateLimitMsg);
       return;
     }
 
-    // Validate inputs
     if (!formData.question.trim() || formData.question.length > 500) {
       return;
     }
@@ -336,7 +328,6 @@ const SuggestQuestionModal = ({
     setIsSubmitting(true);
     setRateLimitError('');
 
-    // Create mailto link with clear site identification
     const subject = encodeURIComponent(`New Question Suggestion for ${siteName}`);
     const body = encodeURIComponent(`
 Question: ${formData.question.trim()}
@@ -353,13 +344,11 @@ Timestamp: ${new Date().toISOString()}
     
     window.location.href = `mailto:studio@harpoon.productions?subject=${subject}&body=${body}`;
     
-    // Set rate limiting
     localStorage.setItem('lastQuestionSubmission', Date.now().toString());
     
     setIsSubmitting(false);
     setIsSubmitted(true);
     
-    // Close modal after 2.5 seconds
     setTimeout(() => {
       setIsSubmitted(false);
       onClose();
@@ -380,7 +369,6 @@ Timestamp: ${new Date().toISOString()}
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className={`${colors.bg} ${colors.border} border-b px-6 py-4 rounded-t-2xl`}>
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-800">Suggest a University Question</h2>
@@ -398,7 +386,6 @@ Timestamp: ${new Date().toISOString()}
           </p>
         </div>
 
-        {/* Content */}
         <div className="p-6">
           {isSubmitted ? (
             <div className="text-center py-8">
@@ -412,14 +399,12 @@ Timestamp: ${new Date().toISOString()}
             </div>
           ) : (
             <div className="space-y-4">
-              {/* Rate limit error */}
               {rateLimitError && (
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                   <p className="text-amber-800 text-sm">{rateLimitError}</p>
                 </div>
               )}
 
-              {/* Question Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Your University Question *
@@ -439,7 +424,6 @@ Timestamp: ${new Date().toISOString()}
                 </p>
               </div>
 
-              {/* Email Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Your Email *
@@ -458,7 +442,6 @@ Timestamp: ${new Date().toISOString()}
                 </p>
               </div>
 
-              {/* Context Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Additional Context (optional)
@@ -477,7 +460,6 @@ Timestamp: ${new Date().toISOString()}
                 </p>
               </div>
 
-              {/* Submit Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -530,10 +512,10 @@ export default function HomePage() {
         }`;
         
         const result = await client.fetch(query);
-        setFaqs(result || []); // Ensure we always have an array
+        setFaqs(result || []);
       } catch (error) {
         console.error('❌ Fetch error:', error);
-        setFaqs([]); // Set empty array on error
+        setFaqs([]);
       }
     };
 
@@ -547,7 +529,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      {/* Website and Organization Structured Data */}
+      {/* Structured Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -583,28 +565,6 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Organization",
-            "@id": "https://goingtounifaqs.com/#organization",
-            "name": "Harpoon Productions Ltd",
-            "alternateName": "Going To Uni FAQs",
-            "url": "https://goingtounifaqs.com",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://goingtounifaqs.com/goingtounifaqs.png"
-            },
-            "description": "Quick answers to your university and college questions",
-            "foundingDate": "2025",
-            "sameAs": []
-          })
-        }}
-      />
-
-      {/* FAQPage Schema for the collection */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
             "@type": "FAQPage",
             "@id": "https://goingtounifaqs.com/#faqpage",
             "url": "https://goingtounifaqs.com",
@@ -628,33 +588,24 @@ export default function HomePage() {
         }}
       />
 
-      {/* Main Content - Flex grow to push footer down */}
+      {/* Main Content */}
       <div className="flex-grow">
-        {/* Header Section with Logo */}
+        {/* Header Section - Matching UPF Layout */}
         <div className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
-          <div className="container mx-auto text-center" style={{ maxWidth: '1600px' }}>
+          <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
             <Link href="/" className="inline-block">
-              <div className="mx-auto mb-6">
-                <Image
-                  src="/goingtounifaqs.png"
-                  alt="Going To Uni FAQs"
-                  width={500}
-                  height={150}
-                  className="mx-auto mb-4"
-                  priority
-                />
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <div className="w-12 h-1 bg-gradient-to-r from-purple-400 to-indigo-400 rounded-full"></div>
-                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <div className="w-12 h-1 bg-gradient-to-r from-indigo-400 to-blue-400 rounded-full"></div>
-                </div>
-              </div>
+              <Image
+                src="/goingtounifaqs.png"
+                alt="Going To Uni FAQs"
+                width={400}
+                height={120}
+                className="mx-auto mb-6"
+              />
             </Link>
             <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">
               Quick answers to your university and college questions
             </p>
             
-            {/* Search Box */}
             <div className="mb-8">
               <SearchBox 
                 faqs={faqs}
@@ -663,7 +614,6 @@ export default function HomePage() {
               />
             </div>
 
-            {/* Suggest Question CTA */}
             <div className="flex items-center justify-center gap-4">
               <div className="h-px bg-slate-300 flex-1 max-w-24"></div>
               <span className="text-slate-500 text-sm">or</span>
@@ -672,7 +622,7 @@ export default function HomePage() {
             
             <button
               onClick={() => handleSuggestQuestion()}
-              className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -685,11 +635,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Articles Grid */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
+        {/* Articles Grid - MATCHING UPF LAYOUT */}
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {faqs.map((faq) => {
-              // Use the safe image URL function
               const imageUrl = getImageUrl(faq.image, 500, 300);
 
               return (
@@ -697,7 +646,6 @@ export default function HomePage() {
                   key={faq._id}
                   className="group relative overflow-hidden rounded-3xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
                 >
-                  {/* Clickable Image Container with Overlay */}
                   <Link
                     href={`/faqs/${faq.slug.current}`}
                     className="block relative overflow-hidden group"
@@ -711,12 +659,9 @@ export default function HomePage() {
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       
-                      {/* Dark gradient overlay for text readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                       
-                      {/* Text overlay */}
                       <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
-                        {/* Badge */}
                         <div className="mb-3">
                           <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
                             <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -724,13 +669,11 @@ export default function HomePage() {
                           </span>
                         </div>
                         
-                        {/* Question Title */}
                         <h2 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-purple-200 transition-colors duration-300">
                           {faq.question}
                         </h2>
                       </div>
                       
-                      {/* Hover indicator */}
                       <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
                         <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -741,14 +684,12 @@ export default function HomePage() {
 
                   {/* Content Section */}
                   <div className="p-6 md:p-8">
-                    {/* Summary */}
                     {faq.summaryForAI && (
                       <p className="text-slate-600 leading-relaxed line-clamp-3 mb-6">
                         {faq.summaryForAI}
                       </p>
                     )}
 
-                    {/* Read More Link */}
                     <Link
                       href={`/faqs/${faq.slug.current}`}
                       className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold text-sm group/link transition-colors duration-200"
@@ -765,7 +706,6 @@ export default function HomePage() {
                     </Link>
                   </div>
 
-                  {/* Subtle border effect */}
                   <div className="absolute inset-0 rounded-3xl ring-1 ring-slate-200/50 group-hover:ring-purple-300/50 transition-colors duration-300 pointer-events-none" />
                 </article>
               )
@@ -793,9 +733,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer with "Powered by Upsum" - Full width treatment */}
+      {/* Footer - MATCHING UPF STYLE */}
       <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
             <span>Powered by</span>
             <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
