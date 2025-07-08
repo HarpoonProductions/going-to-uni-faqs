@@ -571,7 +571,7 @@ export default function FaqPage({ params }: FaqPageProps) {
           {faq.image?.asset?.url && (
             <div className="relative h-80 md:h-96 overflow-hidden">
               <Image
-                src={urlFor(faq.image).width(1200).height(600).fit('crop').url()}
+                src={faq.image.asset.url}
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
@@ -618,7 +618,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                 <div className="flex items-center gap-2">
                   {faq.author.image && (
                     <Image
-                      src={urlFor(faq.author.image).width(32).height(32).url()}
+                      src={faq.author.image.asset.url}
                       alt={faq.author.name}
                       width={32}
                       height={32}
@@ -692,7 +692,7 @@ export default function FaqPage({ params }: FaqPageProps) {
               {relatedFaqs.map((related) => {
                 const imageUrl = related.image?.asset?.url
                   ? urlFor(related.image).width(500).height(300).fit('crop').url()
-                  : '/fallback.jpg'
+                  : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ci8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
 
                 return (
                   <Link

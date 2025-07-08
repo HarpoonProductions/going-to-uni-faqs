@@ -649,10 +649,10 @@ export default function HomePage() {
         {/* Articles Grid - EXACT UPF PATTERN */}
         <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {faqs.map((faq) => {
-              const imageUrl = faq.image?.asset?.url
-                ? urlFor(faq.image).width(500).height(300).fit('crop').url()
-                : '/fallback.jpg'
+            {faqs.map((faq, index) => {
+              // TEST: Use raw URL directly without urlFor to see if that works
+              const imageUrl = faq.image?.asset?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ci8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
+              console.log('Using raw image URL:', imageUrl);
 
               return (
                 <article
