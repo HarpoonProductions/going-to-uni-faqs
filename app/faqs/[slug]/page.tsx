@@ -59,31 +59,6 @@ interface Faq {
   customSchemaMarkup?: string
 }
 
-interface SiteSettings {
-  title: string
-  description: string
-  url: string
-  logo?: {
-    asset: { url: string }
-    alt?: string
-  }
-  organization: {
-    name: string
-    alternateName?: string
-    foundingDate?: string
-    areaServed?: string
-    knowsAbout?: string[]
-  }
-  socialMedia?: {
-    twitter?: string
-    linkedin?: string
-    facebook?: string
-  }
-  searchAction?: {
-    searchUrl?: string
-  }
-}
-
 // Enhanced queries
 const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   _id,
@@ -123,16 +98,6 @@ const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   image,
   seo,
   customSchemaMarkup
-}`
-
-const siteSettingsQuery = groq`*[_type == "siteSettings"][0] {
-  title,
-  description,
-  url,
-  logo,
-  organization,
-  socialMedia,
-  searchAction
 }`
 
 const relatedQuery = groq`*[_type == "faq" && _id != $currentId && (category._ref == $categoryRef || count((keywords[])[@ in $keywords]) > 0)][0...3] {
