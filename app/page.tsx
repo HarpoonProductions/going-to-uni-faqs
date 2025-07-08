@@ -178,7 +178,7 @@ const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps
               </div>
               <h4 className="font-medium text-slate-800 mb-2">No results found</h4>
               <p className="text-sm text-slate-600 mb-4">
-                We couldn't find any university FAQs matching "{query}"
+                We couldn&apos;t find any university FAQs matching &quot;{query}&quot;
               </p>
               <button
                 onClick={() => {
@@ -378,7 +378,7 @@ Timestamp: ${new Date().toISOString()}
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-slate-800 mb-2">Thank you!</h3>
-              <p className="text-slate-600">Your university question suggestion has been sent. We'll review it and may add it to our FAQ collection.</p>
+              <p className="text-slate-600">Your university question suggestion has been sent. We&apos;ll review it and may add it to our FAQ collection.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -641,7 +641,7 @@ export default function HomePage() {
               Suggest a University Question
             </button>
             <p className="text-slate-500 text-sm mt-3">
-              Can't find what you're looking for? Let us know!
+              Can&apos;t find what you&apos;re looking for? Let us know!
             </p>
           </div>
         </div>

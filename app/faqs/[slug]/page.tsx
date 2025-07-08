@@ -37,7 +37,7 @@ interface Category {
 interface Faq {
   _id: string
   question: string
-  answer: any[]
+  answer: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   slug: { current: string }
   summaryForAI?: string
   alternateQuestions?: string[]
@@ -292,7 +292,7 @@ const FAQPageSearch = ({ searchFAQs }: { searchFAQs: SearchFAQ[] }) => {
               </div>
               <h4 className="font-medium text-slate-800 mb-1 text-sm">No results found</h4>
               <p className="text-xs text-slate-600">
-                No university FAQs match "{query}"
+                No university FAQs match &quot;{query}&quot;
               </p>
             </div>
           )}
@@ -407,7 +407,7 @@ const CitationBox = ({ question, url, theme = 'purple' }: CitationBoxProps) => {
             </span>
           </h3>
           <p className="text-sm text-slate-700 leading-relaxed">
-            "{question}." <em className="font-medium">Going To Uni FAQs</em>. Available at:{' '}
+            &quot;{question}.&quot; <em className="font-medium">Going To Uni FAQs</em>. Available at:{' '}
             <span className={`${colors.linkText} underline decoration-2 underline-offset-2 transition-colors duration-200 break-all`}>
               {url}
             </span>
@@ -441,7 +441,6 @@ interface FaqPageProps {
 export default function FaqPage({ params }: FaqPageProps) {
   const [slug, setSlug] = useState<string>('');
   const [faq, setFaq] = useState<Faq | null>(null);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedFaqs, setRelatedFaqs] = useState<Faq[]>([]);
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
@@ -456,10 +455,9 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      // Fetch FAQ, site settings, and search FAQs
-      const [faqData, siteSettingsData, searchFAQsData] = await Promise.allSettled([
+      // Fetch FAQ and search FAQs
+      const [faqData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
-        client.fetch(siteSettingsQuery),
         client.fetch(searchFAQsQuery)
       ]);
 
@@ -469,7 +467,6 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
-      setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
       // Fetch related FAQs if keywords/category exist
