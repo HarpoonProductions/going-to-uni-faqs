@@ -760,9 +760,13 @@ export default function HomePage() {
         <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
             <span>Powered by</span>
-            <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Upsum
-            </div>
+            <Image
+  src="/upsum.png"
+  alt="Upsum"
+  width={60}
+  height={24}
+  className="opacity-70"
+/>
           </div>
           <p className="text-xs text-slate-400">
             Upsum is a trademark of{' '}
