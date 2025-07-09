@@ -1,4 +1,4 @@
-// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page - EXACT COPY of working UPF pattern with purple theme
+// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page - ULTRA CLEAN VERSION
 
 'use client'
 
@@ -57,31 +57,6 @@ interface Faq {
     metaDescription?: string
   }
   customSchemaMarkup?: string
-}
-
-interface SiteSettings {
-  title: string
-  description: string
-  url: string
-  logo?: {
-    asset?: { url: string }
-    alt?: string
-  }
-  organization: {
-    name: string
-    alternateName?: string
-    foundingDate?: string
-    areaServed?: string
-    knowsAbout?: string[]
-  }
-  socialMedia?: {
-    twitter?: string
-    linkedin?: string
-    facebook?: string
-  }
-  searchAction?: {
-    searchUrl?: string
-  }
 }
 
 // FIXED: Enhanced queries with proper image asset references
@@ -493,7 +468,7 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      // Fetch FAQ and search FAQs (removed siteSettings to avoid unused variable)
+      // Fetch FAQ and search FAQs only
       const [faqData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
         client.fetch(searchFAQsQuery)
