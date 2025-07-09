@@ -145,22 +145,6 @@ const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   customSchemaMarkup
 }`
 
-const siteSettingsQuery = groq`*[_type == "siteSettings"][0] {
-  title,
-  description,
-  url,
-  logo {
-    asset->{
-      _id,
-      url
-    },
-    alt
-  },
-  organization,
-  socialMedia,
-  searchAction
-}`
-
 const relatedQuery = groq`*[_type == "faq" && _id != $currentId && (category._ref == $categoryRef || count((keywords[])[@ in $keywords]) > 0)][0...3] {
   _id,
   question,
