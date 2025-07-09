@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
+import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
 
 interface Author {
@@ -58,6 +59,31 @@ interface Faq {
   customSchemaMarkup?: string
 }
 
+interface SiteSettings {
+  title: string
+  description: string
+  url: string
+  logo?: {
+    asset: { url: string }
+    alt?: string
+  }
+  organization: {
+    name: string
+    alternateName?: string
+    foundingDate?: string
+    areaServed?: string
+    knowsAbout?: string[]
+  }
+  socialMedia?: {
+    twitter?: string
+    linkedin?: string
+    facebook?: string
+  }
+  searchAction?: {
+    searchUrl?: string
+  }
+}
+
 // Enhanced queries
 const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   _id,
@@ -97,6 +123,16 @@ const faqQuery = groq`*[_type == "faq" && slug.current == $slug][0] {
   image,
   seo,
   customSchemaMarkup
+}`
+
+const siteSettingsQuery = groq`*[_type == "siteSettings"][0] {
+  title,
+  description,
+  url,
+  logo,
+  organization,
+  socialMedia,
+  searchAction
 }`
 
 const relatedQuery = groq`*[_type == "faq" && _id != $currentId && (category._ref == $categoryRef || count((keywords[])[@ in $keywords]) > 0)][0...3] {
@@ -405,6 +441,7 @@ interface FaqPageProps {
 export default function FaqPage({ params }: FaqPageProps) {
   const [slug, setSlug] = useState<string>('');
   const [faq, setFaq] = useState<Faq | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedFaqs, setRelatedFaqs] = useState<Faq[]>([]);
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
@@ -419,9 +456,10 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      // Fetch FAQ and search FAQs
-      const [faqData, searchFAQsData] = await Promise.allSettled([
+      // Fetch FAQ, site settings, and search FAQs
+      const [faqData, siteSettingsData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
+        client.fetch(siteSettingsQuery),
         client.fetch(searchFAQsQuery)
       ]);
 
@@ -431,6 +469,7 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
+      setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
       // Fetch related FAQs if keywords/category exist
@@ -570,7 +609,7 @@ export default function FaqPage({ params }: FaqPageProps) {
           {faq.image?.asset?.url && (
             <div className="relative h-80 md:h-96 overflow-hidden">
               <Image
-                src={faq.image.asset.url}
+                src={urlFor(faq.image).width(1200).height(600).fit('crop').url()}
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
@@ -617,7 +656,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                 <div className="flex items-center gap-2">
                   {faq.author.image && (
                     <Image
-                      src={faq.author.image.asset.url}
+                      src={urlFor(faq.author.image).width(32).height(32).url()}
                       alt={faq.author.name}
                       width={32}
                       height={32}
@@ -691,7 +730,7 @@ export default function FaqPage({ params }: FaqPageProps) {
               {relatedFaqs.map((related) => {
                 const imageUrl = related.image?.asset?.url
                   ? urlFor(related.image).width(500).height(300).fit('crop').url()
-                  : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ci8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
+                  : '/fallback.jpg'
 
                 return (
                   <Link
@@ -779,4 +818,3 @@ export default function FaqPage({ params }: FaqPageProps) {
     </div>
   )
 }
-//force push //
