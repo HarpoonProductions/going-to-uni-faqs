@@ -1,4 +1,4 @@
-// app/faqs/[slug]/page.tsx - FIXED Going To Uni FAQs Individual FAQ page with consistent image handling
+// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page - EXACT COPY of working UPF pattern with purple theme
 
 'use client'
 
@@ -189,7 +189,7 @@ const searchFAQsQuery = groq`*[_type == "faq" && defined(slug.current) && define
 }`
 
 // FIXED: Universal image URL function that works across all sites
-const getImageUrl = (image: any, width?: number, height?: number, fallback = '/fallback.jpg') => {
+const getImageUrl = (image: any, width?: number, height?: number, fallback = '/fallback.jpg') => { // eslint-disable-line @typescript-eslint/no-explicit-any
   // Check if we have image data
   if (!image?.asset?.url) {
     return fallback;
@@ -495,7 +495,6 @@ interface FaqPageProps {
 export default function FaqPage({ params }: FaqPageProps) {
   const [slug, setSlug] = useState<string>('');
   const [faq, setFaq] = useState<Faq | null>(null);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [relatedFaqs, setRelatedFaqs] = useState<Faq[]>([]);
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
@@ -510,10 +509,9 @@ export default function FaqPage({ params }: FaqPageProps) {
 
   const fetchFaqData = async (faqSlug: string) => {
     try {
-      // Fetch FAQ, site settings, and search FAQs
-      const [faqData, siteSettingsData, searchFAQsData] = await Promise.allSettled([
+      // Fetch FAQ and search FAQs (removed siteSettings to avoid unused variable)
+      const [faqData, searchFAQsData] = await Promise.allSettled([
         client.fetch(faqQuery, { slug: faqSlug }),
-        client.fetch(siteSettingsQuery),
         client.fetch(searchFAQsQuery)
       ]);
 
@@ -523,8 +521,6 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
-      // siteSettings fetched but not used in this component
-      setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
       // Fetch related FAQs if keywords/category exist
@@ -673,9 +669,6 @@ export default function FaqPage({ params }: FaqPageProps) {
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
-                onError={() => {
-                  console.error('Main image failed to load');
-                }}
               />
               
               {/* Dark gradient overlay for text readability */}
@@ -724,9 +717,6 @@ export default function FaqPage({ params }: FaqPageProps) {
                       width={32}
                       height={32}
                       className="rounded-full"
-                      onError={() => {
-                        console.error('Author image failed to load');
-                      }}
                     />
                   )}
                   <span>By {faq.author.name}</span>
@@ -809,9 +799,6 @@ export default function FaqPage({ params }: FaqPageProps) {
                         alt={related.question}
                         fill
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                        onError={() => {
-                          console.error('Related FAQ image failed to load');
-                        }}
                       />
                       
                       {/* Dark gradient overlay */}
