@@ -8,7 +8,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
-import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
 
 interface Author {
