@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage - EXACT COPY of UPF pattern with purple theme
+// app/page.tsx - Going To Uni FAQs Homepage - EXACT COPY of working UPF code with purple theme
 
 'use client'
 
@@ -6,6 +6,7 @@ import groq from 'groq'
 import { client } from '@/lib/sanity'
 import Link from 'next/link'
 import Image from 'next/image'
+import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
 
 // Type definitions
@@ -31,7 +32,7 @@ interface SearchBoxProps {
   theme?: 'blue' | 'orange' | 'purple';
 }
 
-// Search Component - Purple themed for Going To Uni
+// Search Component
 const SearchBox = ({ faqs, onSuggestQuestion, theme = 'purple' }: SearchBoxProps) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -598,7 +599,7 @@ export default function HomePage() {
 
       {/* Main Content - Flex grow to push footer down */}
       <div className="flex-grow">
-        {/* Header Section with PNG logo - EXACT UPF PATTERN */}
+        {/* Header Section with PNG logo */}
         <div className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
           <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
             <Link href="/" className="inline-block">
@@ -645,13 +646,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Articles Grid - EXACT UPF PATTERN */}
+        {/* Articles Grid */}
         <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {faqs.map((faq) => {
-              // TEST: Use raw URL directly without urlFor to see if that works
-              const imageUrl = faq.image?.asset?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDUwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ci8+CjxwYXRoIGQ9Ik0yMzAgMTIwSDE3MFYxODBIMjMwVjEyMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTI3MCAyMDBIMTMwVjE4MEgyNzBWMjAwWiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'
-              console.log('Using raw image URL:', imageUrl);
+              const imageUrl = faq.image?.asset?.url
+                ? urlFor(faq.image).width(500).height(300).fit('crop').url()
+                : '/fallback.jpg'
 
               return (
                 <article
@@ -754,7 +755,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer - EXACT UPF PATTERN */}
+      {/* Standardized Footer with "Powered by Upsum" */}
       <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
           <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
