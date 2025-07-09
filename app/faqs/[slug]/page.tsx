@@ -37,7 +37,7 @@ interface Category {
 interface Faq {
   _id: string
   question: string
-  answer: any[]
+  answer: any[] // eslint-disable-line @typescript-eslint/no-explicit-any
   slug: { current: string }
   summaryForAI?: string
   alternateQuestions?: string[]
@@ -523,6 +523,7 @@ export default function FaqPage({ params }: FaqPageProps) {
       }
       
       setFaq(faqData.value);
+      // siteSettings fetched but not used in this component
       setSiteSettings(siteSettingsData.status === 'fulfilled' ? siteSettingsData.value : null);
       setSearchFAQs(searchFAQsData.status === 'fulfilled' ? searchFAQsData.value || [] : []);
       
@@ -672,7 +673,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                 alt={faq.image.alt || faq.question}
                 fill
                 className="object-cover"
-                onError={(e) => {
+                onError={() => {
                   console.error('Main image failed to load');
                 }}
               />
@@ -723,7 +724,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                       width={32}
                       height={32}
                       className="rounded-full"
-                      onError={(e) => {
+                      onError={() => {
                         console.error('Author image failed to load');
                       }}
                     />
@@ -808,7 +809,7 @@ export default function FaqPage({ params }: FaqPageProps) {
                         alt={related.question}
                         fill
                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                        onError={(e) => {
+                        onError={() => {
                           console.error('Related FAQ image failed to load');
                         }}
                       />
