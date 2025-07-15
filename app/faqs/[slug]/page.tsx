@@ -10,7 +10,6 @@ import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
 import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
-import Head from 'next/head'
 
 interface Author {
   _id: string
@@ -459,6 +458,21 @@ export default function FaqPage({ params }: FaqPageProps) {
   const [searchFAQs, setSearchFAQs] = useState<SearchFAQ[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Load CommonNinja script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.commoninja.com/sdk/latest/commonninja.js';
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on unmount
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
   // Resolve params and fetch data
   useEffect(() => {
     params.then(resolvedParams => {
@@ -519,13 +533,7 @@ export default function FaqPage({ params }: FaqPageProps) {
   const faqUrl = `https://goingtounifaqs.com/faqs/${slug}`;
 
   return (
-    <>
-      {/* CommonNinja AI Chatbot Scripts */}
-      <Head>
-        <script src="https://cdn.commoninja.com/sdk/latest/commonninja.js" defer></script>
-      </Head>
-
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
         {/* Enhanced JSON-LD Structured Data */}
         <script
           type="application/ld+json"
@@ -843,6 +851,5 @@ export default function FaqPage({ params }: FaqPageProps) {
         {/* CommonNinja AI Chatbot Component */}
         <div className="commonninja_component" data-pid="7a7786ad-2b00-4034-83ce-63ea64c15748"></div>
       </div>
-    </>
   )
 }
