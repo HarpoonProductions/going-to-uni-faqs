@@ -1,4 +1,4 @@
-// app/page.tsx - Going To Uni FAQs Homepage - EXACT COPY of working UPF code with purple theme
+// app/page.tsx - Going To Uni FAQs Homepage with AI Chatbot
 
 'use client'
 
@@ -8,6 +8,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
+import Head from 'next/head'
 
 // Type definitions
 interface FAQ {
@@ -268,14 +269,15 @@ const SuggestQuestionModal = ({
 
   const colors = themeColors[theme];
 
-  // Check rate limiting
+  // Check rate limiting (using in-memory storage instead of localStorage)
+  const [lastSubmissionTime, setLastSubmissionTime] = useState<number | null>(null);
+  
   const checkRateLimit = () => {
-    const lastSubmission = localStorage.getItem('lastQuestionSubmission');
     const now = Date.now();
     const oneDay = 24 * 60 * 60 * 1000;
 
-    if (lastSubmission && (now - parseInt(lastSubmission)) < oneDay) {
-      const timeLeft = oneDay - (now - parseInt(lastSubmission));
+    if (lastSubmissionTime && (now - lastSubmissionTime) < oneDay) {
+      const timeLeft = oneDay - (now - lastSubmissionTime);
       const hoursLeft = Math.ceil(timeLeft / (60 * 60 * 1000));
       return `Please wait ${hoursLeft} hours before suggesting another question.`;
     }
@@ -323,8 +325,8 @@ Timestamp: ${new Date().toISOString()}
     
     window.location.href = `mailto:studio@harpoon.productions?subject=${subject}&body=${body}`;
     
-    // Set rate limiting
-    localStorage.setItem('lastQuestionSubmission', Date.now().toString());
+    // Set rate limiting in memory
+    setLastSubmissionTime(Date.now());
     
     setIsSubmitting(false);
     setIsSubmitted(true);
@@ -515,282 +517,292 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
-      {/* Website and Organization Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "@id": "https://goingtounifaqs.com/#website",
-            "url": "https://goingtounifaqs.com",
-            "name": "Going To Uni FAQs",
-            "description": "Quick answers to your university and college questions",
-            "inLanguage": "en-US",
-            "publisher": {
+    <>
+      {/* CommonNinja AI Chatbot Scripts */}
+      <Head>
+        <script src="https://cdn.commoninja.com/sdk/latest/commonninja.js" defer></script>
+      </Head>
+
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-purple-50 via-white to-indigo-50">
+        {/* Website and Organization Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "@id": "https://goingtounifaqs.com/#website",
+              "url": "https://goingtounifaqs.com",
+              "name": "Going To Uni FAQs",
+              "description": "Quick answers to your university and college questions",
+              "inLanguage": "en-US",
+              "publisher": {
+                "@type": "Organization",
+                "@id": "https://goingtounifaqs.com/#organization",
+                "name": "Harpoon Productions Ltd",
+                "alternateName": "Going To Uni FAQs",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": "https://goingtounifaqs.com/goingtounifaqs.png"
+                }
+              },
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://goingtounifaqs.com/?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            })
+          }}
+        />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
               "@type": "Organization",
               "@id": "https://goingtounifaqs.com/#organization",
               "name": "Harpoon Productions Ltd",
               "alternateName": "Going To Uni FAQs",
+              "url": "https://goingtounifaqs.com",
               "logo": {
                 "@type": "ImageObject",
                 "url": "https://goingtounifaqs.com/goingtounifaqs.png"
-              }
-            },
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": "https://goingtounifaqs.com/?q={search_term_string}",
-              "query-input": "required name=search_term_string"
-            }
-          })
-        }}
-      />
+              },
+              "description": "Quick answers to your university and college questions",
+              "foundingDate": "2025",
+              "sameAs": []
+            })
+          }}
+        />
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            "@id": "https://goingtounifaqs.com/#organization",
-            "name": "Harpoon Productions Ltd",
-            "alternateName": "Going To Uni FAQs",
-            "url": "https://goingtounifaqs.com",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://goingtounifaqs.com/goingtounifaqs.png"
-            },
-            "description": "Quick answers to your university and college questions",
-            "foundingDate": "2025",
-            "sameAs": []
-          })
-        }}
-      />
+        {/* FAQPage Schema for the collection */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "@id": "https://goingtounifaqs.com/#faqpage",
+              "url": "https://goingtounifaqs.com",
+              "name": "Going To Uni FAQs - University Questions & Answers",
+              "description": "Find answers to frequently asked questions about going to university, college applications, student life, and more",
+              "inLanguage": "en-US",
+              "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://goingtounifaqs.com/#website"
+              },
+              "mainEntity": faqs.slice(0, 5).map((faq) => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.summaryForAI || "Detailed answer available on the page.",
+                  "url": `https://goingtounifaqs.com/faqs/${faq.slug.current}`
+                }
+              }))
+            })
+          }}
+        />
 
-      {/* FAQPage Schema for the collection */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "@id": "https://goingtounifaqs.com/#faqpage",
-            "url": "https://goingtounifaqs.com",
-            "name": "Going To Uni FAQs - University Questions & Answers",
-            "description": "Find answers to frequently asked questions about going to university, college applications, student life, and more",
-            "inLanguage": "en-US",
-            "isPartOf": {
-              "@type": "WebSite",
-              "@id": "https://goingtounifaqs.com/#website"
-            },
-            "mainEntity": faqs.slice(0, 5).map((faq) => ({
-              "@type": "Question",
-              "name": faq.question,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": faq.summaryForAI || "Detailed answer available on the page.",
-                "url": `https://goingtounifaqs.com/faqs/${faq.slug.current}`
-              }
-            }))
-          })
-        }}
-      />
-
-      {/* Main Content - Flex grow to push footer down */}
-      <div className="flex-grow">
-        {/* Header Section with PNG logo */}
-        <div className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
-            <Link href="/" className="inline-block">
-              <Image
-                src="/goingtounifaqs.png"
-                alt="Going To Uni FAQs"
-                width={400}
-                height={120}
-                className="mx-auto mb-6"
-              />
-            </Link>
-            <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">
-              Quick answers to your university and college questions
-            </p>
-            
-            {/* Search Box */}
-            <div className="mb-8">
-              <SearchBox 
-                faqs={faqs}
-                onSuggestQuestion={handleSuggestQuestion}
-                theme="purple"
-              />
-            </div>
-
-            {/* Suggest Question CTA */}
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-px bg-slate-300 flex-1 max-w-24"></div>
-              <span className="text-slate-500 text-sm">or</span>
-              <div className="h-px bg-slate-300 flex-1 max-w-24"></div>
-            </div>
-            
-            <button
-              onClick={() => handleSuggestQuestion()}
-              className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Suggest a University Question
-            </button>
-            <p className="text-slate-500 text-sm mt-3">
-              Can&apos;t find what you&apos;re looking for? Let us know!
-            </p>
-          </div>
-        </div>
-
-        {/* Articles Grid */}
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {faqs.map((faq) => {
-              const imageUrl = faq.image?.asset?.url
-                ? urlFor(faq.image).width(500).height(300).fit('crop').url()
-                : '/fallback.jpg'
-
-              return (
-                <article
-                  key={faq._id}
-                  className="group relative overflow-hidden rounded-3xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
-                >
-                  {/* Clickable Image Container with Overlay */}
-                  <Link
-                    href={`/faqs/${faq.slug.current}`}
-                    className="block relative overflow-hidden group"
-                  >
-                    <div className="relative h-64 md:h-72 overflow-hidden">
-                      <Image
-                        src={imageUrl}
-                        alt={faq.image?.alt || faq.question}
-                        fill
-                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      
-                      {/* Dark gradient overlay for text readability */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      
-                      {/* Text overlay */}
-                      <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
-                        {/* Timestamp */}
-                        <div className="mb-3">
-                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                            University Question
-                          </span>
-                        </div>
-                        
-                        {/* Question Title */}
-                        <h2 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-purple-200 transition-colors duration-300">
-                          {faq.question}
-                        </h2>
-                      </div>
-                      
-                      {/* Hover indicator */}
-                      <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
-                        <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Content Section */}
-                  <div className="p-6 md:p-8">
-                    {/* Summary */}
-                    {faq.summaryForAI && (
-                      <p className="text-slate-600 leading-relaxed line-clamp-3 mb-6">
-                        {faq.summaryForAI}
-                      </p>
-                    )}
-
-                    {/* Read More Link */}
-                    <Link
-                      href={`/faqs/${faq.slug.current}`}
-                      className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold text-sm group/link transition-colors duration-200"
-                    >
-                      Read full answer
-                      <svg 
-                        className="w-4 h-4 transition-transform duration-200 group-hover/link:translate-x-1" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </Link>
-                  </div>
-
-                  {/* Subtle border effect */}
-                  <div className="absolute inset-0 rounded-3xl ring-1 ring-slate-200/50 group-hover:ring-purple-300/50 transition-colors duration-300 pointer-events-none" />
-                </article>
-              )
-            })}
-          </div>
-
-          {/* Empty state */}
-          {faqs.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
-                <svg className="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                </svg>
+        {/* Main Content - Flex grow to push footer down */}
+        <div className="flex-grow">
+          {/* Header Section with PNG logo */}
+          <div className="pt-16 pb-12 px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
+              <Link href="/" className="inline-block">
+                <Image
+                  src="/goingtounifaqs.png"
+                  alt="Going To Uni FAQs"
+                  width={400}
+                  height={120}
+                  className="mx-auto mb-6"
+                />
+              </Link>
+              <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">
+                Quick answers to your university and college questions
+              </p>
+              
+              {/* Search Box */}
+              <div className="mb-8">
+                <SearchBox 
+                  faqs={faqs}
+                  onSuggestQuestion={handleSuggestQuestion}
+                  theme="purple"
+                />
               </div>
-              <h3 className="text-xl font-semibold text-slate-700 mb-2">No university FAQs found</h3>
-              <p className="text-slate-500 mb-4">Check back later for new questions and answers about going to university!</p>
+
+              {/* Suggest Question CTA */}
+              <div className="flex items-center justify-center gap-4">
+                <div className="h-px bg-slate-300 flex-1 max-w-24"></div>
+                <span className="text-slate-500 text-sm">or</span>
+                <div className="h-px bg-slate-300 flex-1 max-w-24"></div>
+              </div>
+              
               <button
                 onClick={() => handleSuggestQuestion()}
-                className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200"
+                className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                Be the first to suggest a university question →
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Suggest a University Question
               </button>
+              <p className="text-slate-500 text-sm mt-3">
+                Can&apos;t find what you&apos;re looking for? Let us know!
+              </p>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Standardized Footer with "Powered by Upsum" */}
-      <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
-          <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
-            <span>Powered by</span>
-            <Image
-  src="/upsum.png"
-  alt="Upsum"
-  width={60}
-  height={24}
-  className="opacity-70"
-/>
           </div>
-          <p className="text-xs text-slate-400">
-            Upsum is a trademark of{' '}
-            <a 
-              href="https://harpoon.productions" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-slate-600 transition-colors duration-200"
-            >
-              Harpoon Productions
-            </a>
-          </p>
-        </div>
-      </footer>
 
-      {/* Suggest Question Modal */}
-      <SuggestQuestionModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        theme="purple"
-        siteName="Going To Uni FAQs"
-        siteUrl="https://goingtounifaqs.com"
-        prefillQuestion={prefillQuestion}
-      />
-    </div>
+          {/* Articles Grid */}
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {faqs.map((faq) => {
+                const imageUrl = faq.image?.asset?.url
+                  ? urlFor(faq.image).width(500).height(300).fit('crop').url()
+                  : '/fallback.jpg'
+
+                return (
+                  <article
+                    key={faq._id}
+                    className="group relative overflow-hidden rounded-3xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2"
+                  >
+                    {/* Clickable Image Container with Overlay */}
+                    <Link
+                      href={`/faqs/${faq.slug.current}`}
+                      className="block relative overflow-hidden group"
+                    >
+                      <div className="relative h-64 md:h-72 overflow-hidden">
+                        <Image
+                          src={imageUrl}
+                          alt={faq.image?.alt || faq.question}
+                          fill
+                          className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        
+                        {/* Dark gradient overlay for text readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        
+                        {/* Text overlay */}
+                        <div className="absolute inset-0 p-6 md:p-8 flex flex-col justify-end">
+                          {/* Timestamp */}
+                          <div className="mb-3">
+                            <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                              University Question
+                            </span>
+                          </div>
+                          
+                          {/* Question Title */}
+                          <h2 className="text-xl md:text-2xl font-bold text-white leading-tight group-hover:text-purple-200 transition-colors duration-300">
+                            {faq.question}
+                          </h2>
+                        </div>
+                        
+                        {/* Hover indicator */}
+                        <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-2 group-hover:translate-x-0">
+                          <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Content Section */}
+                    <div className="p-6 md:p-8">
+                      {/* Summary */}
+                      {faq.summaryForAI && (
+                        <p className="text-slate-600 leading-relaxed line-clamp-3 mb-6">
+                          {faq.summaryForAI}
+                        </p>
+                      )}
+
+                      {/* Read More Link */}
+                      <Link
+                        href={`/faqs/${faq.slug.current}`}
+                        className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold text-sm group/link transition-colors duration-200"
+                      >
+                        Read full answer
+                        <svg 
+                          className="w-4 h-4 transition-transform duration-200 group-hover/link:translate-x-1" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                        </svg>
+                      </Link>
+                    </div>
+
+                    {/* Subtle border effect */}
+                    <div className="absolute inset-0 rounded-3xl ring-1 ring-slate-200/50 group-hover:ring-purple-300/50 transition-colors duration-300 pointer-events-none" />
+                  </article>
+                )
+              })}
+            </div>
+
+            {/* Empty state */}
+            {faqs.length === 0 && (
+              <div className="text-center py-16">
+                <div className="w-24 h-24 mx-auto mb-6 bg-purple-100 rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-slate-700 mb-2">No university FAQs found</h3>
+                <p className="text-slate-500 mb-4">Check back later for new questions and answers about going to university!</p>
+                <button
+                  onClick={() => handleSuggestQuestion()}
+                  className="text-purple-600 hover:text-purple-700 font-medium transition-colors duration-200"
+                >
+                  Be the first to suggest a university question →
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Standardized Footer with "Powered by Upsum" */}
+        <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
+            <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
+              <span>Powered by</span>
+              <Image
+                src="/upsum.png"
+                alt="Upsum"
+                width={60}
+                height={24}
+                className="opacity-70"
+              />
+            </div>
+            <p className="text-xs text-slate-400">
+              Upsum is a trademark of{' '}
+              <a 
+                href="https://harpoon.productions" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-slate-600 transition-colors duration-200"
+              >
+                Harpoon Productions
+              </a>
+            </p>
+          </div>
+        </footer>
+
+        {/* Suggest Question Modal */}
+        <SuggestQuestionModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)}
+          theme="purple"
+          siteName="Going To Uni FAQs"
+          siteUrl="https://goingtounifaqs.com"
+          prefillQuestion={prefillQuestion}
+        />
+
+        {/* CommonNinja AI Chatbot Component */}
+        <div className="commonninja_component" data-pid="7a7786ad-2b00-4034-83ce-63ea64c15748"></div>
+      </div>
+    </>
   )
 }

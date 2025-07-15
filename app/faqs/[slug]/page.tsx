@@ -1,4 +1,4 @@
-// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page - ULTRA CLEAN VERSION
+// app/faqs/[slug]/page.tsx - Going To Uni FAQs Individual FAQ page with AI Chatbot
 
 'use client'
 
@@ -10,6 +10,7 @@ import { PortableText } from '@portabletext/react'
 import { notFound } from 'next/navigation'
 import { urlFor } from '@/lib/sanity'
 import { useState, useEffect, useMemo } from 'react'
+import Head from 'next/head'
 
 interface Author {
   _id: string
@@ -518,320 +519,330 @@ export default function FaqPage({ params }: FaqPageProps) {
   const faqUrl = `https://goingtounifaqs.com/faqs/${slug}`;
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-      {/* Enhanced JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "QAPage",
-            "@id": faqUrl,
-            "url": faqUrl,
-            "name": faq.question,
-            "description": faq.summaryForAI || `Find the answer to: ${faq.question}`,
-            "inLanguage": "en-US",
-            "datePublished": faq.publishedAt || new Date().toISOString(),
-            "dateModified": faq.updatedAt || new Date().toISOString(),
-            "isPartOf": {
-              "@type": "WebSite",
-              "@id": "https://goingtounifaqs.com/#website",
-              "url": "https://goingtounifaqs.com",
-              "name": "Going To Uni FAQs",
-              "description": "Quick answers to your university and college questions",
-              "publisher": {
-                "@type": "Organization",
-                "@id": "https://goingtounifaqs.com/#organization",
-                "name": "Harpoon Productions Ltd",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": "https://goingtounifaqs.com/goingtounifaqs.png"
-                }
-              }
-            },
-            "mainEntity": {
-              "@type": "Question",
-              "@id": `${faqUrl}#question`,
+    <>
+      {/* CommonNinja AI Chatbot Scripts */}
+      <Head>
+        <script src="https://cdn.commoninja.com/sdk/latest/commonninja.js" defer></script>
+      </Head>
+
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        {/* Enhanced JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "QAPage",
+              "@id": faqUrl,
+              "url": faqUrl,
               "name": faq.question,
-              "text": faq.question,
-              "answerCount": 1,
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "@id": `${faqUrl}#answer`,
-                "text": faq.summaryForAI || "Detailed answer provided on the page.",
-                "dateCreated": faq.publishedAt || new Date().toISOString(),
-                "upvoteCount": 0,
-                "author": {
+              "description": faq.summaryForAI || `Find the answer to: ${faq.question}`,
+              "inLanguage": "en-US",
+              "datePublished": faq.publishedAt || new Date().toISOString(),
+              "dateModified": faq.updatedAt || new Date().toISOString(),
+              "isPartOf": {
+                "@type": "WebSite",
+                "@id": "https://goingtounifaqs.com/#website",
+                "url": "https://goingtounifaqs.com",
+                "name": "Going To Uni FAQs",
+                "description": "Quick answers to your university and college questions",
+                "publisher": {
                   "@type": "Organization",
                   "@id": "https://goingtounifaqs.com/#organization",
-                  "name": "Going To Uni FAQs"
+                  "name": "Harpoon Productions Ltd",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://goingtounifaqs.com/goingtounifaqs.png"
+                  }
+                }
+              },
+              "mainEntity": {
+                "@type": "Question",
+                "@id": `${faqUrl}#question`,
+                "name": faq.question,
+                "text": faq.question,
+                "answerCount": 1,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "@id": `${faqUrl}#answer`,
+                  "text": faq.summaryForAI || "Detailed answer provided on the page.",
+                  "dateCreated": faq.publishedAt || new Date().toISOString(),
+                  "upvoteCount": 0,
+                  "author": {
+                    "@type": "Organization",
+                    "@id": "https://goingtounifaqs.com/#organization",
+                    "name": "Going To Uni FAQs"
+                  }
                 }
               }
-            }
-          })
-        }}
-      />
+            })
+          }}
+        />
 
-      {/* Header Section - Matching Homepage exactly */}
-      <div className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
-          <Link href="/" className="inline-block">
-            <Image
-              src="/goingtounifaqs.png"
-              alt="Going To Uni FAQs"
-              width={400}
-              height={120}
-              className="mx-auto mb-4"
-            />
-          </Link>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">
-            Quick answers to your university and college questions
-          </p>
-          
-          {/* Search Box */}
-          <div className="mb-6">
-            <FAQPageSearch searchFAQs={searchFAQs} />
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation - Updated with proper breadcrumbs */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 mb-8" style={{ maxWidth: '1600px' }}>
-        <div className="flex items-center gap-4 text-sm">
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 group font-medium"
-          >
-            <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to hub
-          </Link>
-          <span className="text-slate-400">•</span>
-          <Link 
-            href="/faqs" 
-            className="text-slate-600 hover:text-slate-800 transition-colors duration-200 font-medium"
-          >
-            All FAQs
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Content - Flex grow to push footer down */}
-      <main className="flex-grow mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
-        <article className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mb-12">
-          {/* FIXED: Hero Image with Question Overlay */}
-          {faq.image?.asset?.url && (
-            <div className="relative h-80 md:h-96 overflow-hidden">
+        {/* Header Section - Matching Homepage exactly */}
+        <div className="pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto text-center" style={{ maxWidth: '1600px' }}>
+            <Link href="/" className="inline-block">
               <Image
-                src={getImageUrl(faq.image, 1200, 600)}
-                alt={faq.image.alt || faq.question}
-                fill
-                className="object-cover"
+                src="/goingtounifaqs.png"
+                alt="Going To Uni FAQs"
+                width={400}
+                height={120}
+                className="mx-auto mb-4"
               />
-              
-              {/* Dark gradient overlay for text readability */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              
-              {/* Question overlay */}
-              <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
-                <div className="mb-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
-                    <div className="w-2 h-2 bg-white rounded-full"></div>
-                    University Question
-                  </span>
-                </div>
-                <h1 className="faq-question text-3xl md:text-5xl font-bold text-white leading-tight max-w-4xl">
-                  {faq.question}
-                </h1>
-              </div>
+            </Link>
+            <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-8">
+              Quick answers to your university and college questions
+            </p>
+            
+            {/* Search Box */}
+            <div className="mb-6">
+              <FAQPageSearch searchFAQs={searchFAQs} />
             </div>
-          )}
-
-          {/* Content Section */}
-          <div className="p-8 md:p-12">
-            {/* If no image, show question as heading */}
-            {!faq.image?.asset?.url && (
-              <div className="mb-8">
-                <div className="mb-4">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-slate-700 text-sm font-medium">
-                    <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
-                    University Question
-                  </span>
-                </div>
-                <h1 className="faq-question text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
-                  {faq.question}
-                </h1>
-              </div>
-            )}
-
-            {/* FIXED: Author and Metadata */}
-            {faq.author && (
-              <div className="flex items-center gap-4 text-sm text-slate-600 mb-6">
-                <div className="flex items-center gap-2">
-                  {faq.author.image?.asset?.url && (
-                    <Image
-                      src={getImageUrl(faq.author.image, 32, 32)}
-                      alt={faq.author.name}
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                  )}
-                  <span>By {faq.author.name}</span>
-                  {faq.author.jobTitle && (
-                    <span className="text-slate-400">• {faq.author.jobTitle}</span>
-                  )}
-                </div>
-                <span>•</span>
-                <time dateTime={faq.publishedAt}>
-                  {new Date(faq.publishedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
-              </div>
-            )}
-
-            {/* AI Summary */}
-            {faq.summaryForAI && (
-              <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-8">
-                <p className="text-purple-900 font-medium">Quick Answer:</p>
-                <p className="text-purple-800">{faq.summaryForAI}</p>
-              </div>
-            )}
-
-            {/* Answer Content */}
-            <div className="faq-answer prose prose-lg prose-slate max-w-none mb-8">
-              <PortableText value={faq.answer} />
-            </div>
-
-            {/* Keywords/Tags */}
-            {faq.keywords && faq.keywords.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-sm font-medium text-slate-500 mb-2">Topics:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {faq.keywords.map((keyword, index) => (
-                    <span
-                      key={index}
-                      className="inline-block bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Clickable Citation Box - Purple theme for Going To Uni FAQs */}
-            <CitationBox 
-              question={faq.question}
-              url={faqUrl}
-              theme="purple"
-            />
           </div>
-        </article>
-
-        {/* FIXED: Related Questions - Enhanced with better related logic */}
-        {relatedFaqs?.length > 0 && (
-          <section>
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-slate-800 mb-4">Related University Questions</h3>
-              <p className="text-slate-600 text-lg">Explore more topics about going to university</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {relatedFaqs.map((related) => {
-                const imageUrl = getImageUrl(related.image, 500, 300);
-
-                return (
-                  <Link
-                    key={related._id}
-                    href={`/faqs/${related.slug.current}`}
-                    className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
-                  >
-                    {/* Image with overlay - matching front page style */}
-                    <div className="relative h-64 overflow-hidden">
-                      <Image
-                        src={imageUrl}
-                        alt={related.question}
-                        fill
-                        className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
-                      />
-                      
-                      {/* Dark gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                      
-                      {/* Text overlay */}
-                      <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                        <div className="mb-3">
-                          <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                            Related
-                          </span>
-                        </div>
-                        <h4 className="text-lg font-bold text-white leading-tight group-hover:text-purple-200 transition-colors duration-300">
-                          {related.question}
-                        </h4>
-                      </div>
-                      
-                      {/* Hover indicator */}
-                      <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                        <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6">
-                      {related.summaryForAI && (
-                        <p className="text-slate-600 leading-relaxed line-clamp-3 mb-4">
-                          {related.summaryForAI}
-                        </p>
-                      )}
-                      <div className="flex items-center text-purple-600 text-sm font-medium group-hover:text-purple-700 transition-colors duration-200">
-                        Read answer
-                        <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-        )}
-      </main>
-
-      {/* Footer with "Powered by Upsum" - Now sticky to bottom */}
-      <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
-          <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
-            <span>Powered by</span>
-            <Image
-              src="/upsum.png"
-              alt="Upsum"
-              width={60}
-              height={24}
-              className="opacity-70"
-            />
-          </div>
-          <p className="text-xs text-purple-400">
-            Upsum is a trademark of{' '}
-            <a 
-              href="https://harpoon.productions" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-purple-600 transition-colors duration-200"
-            >
-              Harpoon Productions
-            </a>
-          </p>
         </div>
-      </footer>
-    </div>
+
+        {/* Navigation - Updated with proper breadcrumbs */}
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 mb-8" style={{ maxWidth: '1600px' }}>
+          <div className="flex items-center gap-4 text-sm">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors duration-200 group font-medium"
+            >
+              <svg className="w-4 h-4 transition-transform duration-200 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to hub
+            </Link>
+            <span className="text-slate-400">•</span>
+            <Link 
+              href="/faqs" 
+              className="text-slate-600 hover:text-slate-800 transition-colors duration-200 font-medium"
+            >
+              All FAQs
+            </Link>
+          </div>
+        </div>
+
+        {/* Main Content - Flex grow to push footer down */}
+        <main className="flex-grow mx-auto px-4 sm:px-6 lg:px-8 pb-16" style={{ maxWidth: '1600px' }}>
+          <article className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mb-12">
+            {/* FIXED: Hero Image with Question Overlay */}
+            {faq.image?.asset?.url && (
+              <div className="relative h-80 md:h-96 overflow-hidden">
+                <Image
+                  src={getImageUrl(faq.image, 1200, 600)}
+                  alt={faq.image.alt || faq.question}
+                  fill
+                  className="object-cover"
+                />
+                
+                {/* Dark gradient overlay for text readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
+                {/* Question overlay */}
+                <div className="absolute inset-0 p-8 md:p-12 flex flex-col justify-end">
+                  <div className="mb-4">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-medium">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                      University Question
+                    </span>
+                  </div>
+                  <h1 className="faq-question text-3xl md:text-5xl font-bold text-white leading-tight max-w-4xl">
+                    {faq.question}
+                  </h1>
+                </div>
+              </div>
+            )}
+
+            {/* Content Section */}
+            <div className="p-8 md:p-12">
+              {/* If no image, show question as heading */}
+              {!faq.image?.asset?.url && (
+                <div className="mb-8">
+                  <div className="mb-4">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 rounded-full text-slate-700 text-sm font-medium">
+                      <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
+                      University Question
+                    </span>
+                  </div>
+                  <h1 className="faq-question text-3xl md:text-4xl font-bold text-slate-800 leading-tight">
+                    {faq.question}
+                  </h1>
+                </div>
+              )}
+
+              {/* FIXED: Author and Metadata */}
+              {faq.author && (
+                <div className="flex items-center gap-4 text-sm text-slate-600 mb-6">
+                  <div className="flex items-center gap-2">
+                    {faq.author.image?.asset?.url && (
+                      <Image
+                        src={getImageUrl(faq.author.image, 32, 32)}
+                        alt={faq.author.name}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                    )}
+                    <span>By {faq.author.name}</span>
+                    {faq.author.jobTitle && (
+                      <span className="text-slate-400">• {faq.author.jobTitle}</span>
+                    )}
+                  </div>
+                  <span>•</span>
+                  <time dateTime={faq.publishedAt}>
+                    {new Date(faq.publishedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </time>
+                </div>
+              )}
+
+              {/* AI Summary */}
+              {faq.summaryForAI && (
+                <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-8">
+                  <p className="text-purple-900 font-medium">Quick Answer:</p>
+                  <p className="text-purple-800">{faq.summaryForAI}</p>
+                </div>
+              )}
+
+              {/* Answer Content */}
+              <div className="faq-answer prose prose-lg prose-slate max-w-none mb-8">
+                <PortableText value={faq.answer} />
+              </div>
+
+              {/* Keywords/Tags */}
+              {faq.keywords && faq.keywords.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-medium text-slate-500 mb-2">Topics:</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {faq.keywords.map((keyword, index) => (
+                      <span
+                        key={index}
+                        className="inline-block bg-purple-100 text-purple-700 px-2 py-1 rounded text-sm"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Clickable Citation Box - Purple theme for Going To Uni FAQs */}
+              <CitationBox 
+                question={faq.question}
+                url={faqUrl}
+                theme="purple"
+              />
+            </div>
+          </article>
+
+          {/* FIXED: Related Questions - Enhanced with better related logic */}
+          {relatedFaqs?.length > 0 && (
+            <section>
+              <div className="text-center mb-12">
+                <h3 className="text-3xl font-bold text-slate-800 mb-4">Related University Questions</h3>
+                <p className="text-slate-600 text-lg">Explore more topics about going to university</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                {relatedFaqs.map((related) => {
+                  const imageUrl = getImageUrl(related.image, 500, 300);
+
+                  return (
+                    <Link
+                      key={related._id}
+                      href={`/faqs/${related.slug.current}`}
+                      className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden"
+                    >
+                      {/* Image with overlay - matching front page style */}
+                      <div className="relative h-64 overflow-hidden">
+                        <Image
+                          src={imageUrl}
+                          alt={related.question}
+                          fill
+                          className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-75"
+                        />
+                        
+                        {/* Dark gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                        
+                        {/* Text overlay */}
+                        <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                          <div className="mb-3">
+                            <span className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                              <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                              Related
+                            </span>
+                          </div>
+                          <h4 className="text-lg font-bold text-white leading-tight group-hover:text-purple-200 transition-colors duration-300">
+                            {related.question}
+                          </h4>
+                        </div>
+                        
+                        {/* Hover indicator */}
+                        <div className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                          <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6">
+                        {related.summaryForAI && (
+                          <p className="text-slate-600 leading-relaxed line-clamp-3 mb-4">
+                            {related.summaryForAI}
+                          </p>
+                        )}
+                        <div className="flex items-center text-purple-600 text-sm font-medium group-hover:text-purple-700 transition-colors duration-200">
+                          Read answer
+                          <svg className="w-4 h-4 ml-1 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
+          )}
+        </main>
+
+        {/* Footer with "Powered by Upsum" - Now sticky to bottom */}
+        <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
+            <div className="flex items-center justify-center gap-2 text-slate-500 text-sm mb-2">
+              <span>Powered by</span>
+              <Image
+                src="/upsum.png"
+                alt="Upsum"
+                width={60}
+                height={24}
+                className="opacity-70"
+              />
+            </div>
+            <p className="text-xs text-purple-400">
+              Upsum is a trademark of{' '}
+              <a 
+                href="https://harpoon.productions" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-purple-600 transition-colors duration-200"
+              >
+                Harpoon Productions
+              </a>
+            </p>
+          </div>
+        </footer>
+
+        {/* CommonNinja AI Chatbot Component */}
+        <div className="commonninja_component" data-pid="7a7786ad-2b00-4034-83ce-63ea64c15748"></div>
+      </div>
+    </>
   )
 }
