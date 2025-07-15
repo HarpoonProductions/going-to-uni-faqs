@@ -823,24 +823,20 @@ export default function FaqPage({ params }: FaqPageProps) {
     ></div>
   </>
 )}
-
       {/* ✅ CommonNinja floating widget */}
-      <>
-        <Script
-          src="https://cdn.commoninja.com/sdk/latest/commonninja.js"
-          strategy="afterInteractive"
-        />
-        <div
-          className="commonninja_component pid-7a7786ad-2b00-4034-83ce-63ea64c15748"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            zIndex: 9999,
-          }}
-        />
-      </>
-      
+      <Script
+        src="https://cdn.commoninja.com/sdk/latest/commonninja.js"
+        strategy="afterInteractive"
+      />
+      <div
+        className="commonninja_component pid-7a7786ad-2b00-4034-83ce-63ea64c15748"
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: 9999,
+        }}
+      />
       {/* Footer with "Powered by Upsum" - Now sticky to bottom */}
       <footer className="bg-purple-50 border-t border-purple-200 py-6 mt-auto">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 text-center" style={{ maxWidth: '1600px' }}>
